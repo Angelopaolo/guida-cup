@@ -1,0 +1,141 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f7fb;
+  color: #222;
+  line-height: 1.6;
+}
+
+header {
+  background-color: #1f4e79;
+  color: white;
+  text-align: center;
+  padding: 35px 20px;
+}
+
+header h1 {
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+header p {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+main {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 15px;
+}
+
+.box {
+  background-color: white;
+  margin-bottom: 20px;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.box h2 {
+  color: #1f4e79;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.box ul {
+  padding-left: 22px;
+  margin-bottom: 0;
+}
+
+.evidenza {
+  border-left: 6px solid #c62828;
+}
+
+/* CONTENITORE FAQ */
+.faq-item {
+  margin-bottom: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e3e8ef;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+/* HOVER */
+.faq-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ATTIVO */
+.faq-item.active {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  outline: 2px solid #1f4e79;
+}
+
+/* DOMANDA */
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 18px 20px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1f4e79;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+/* HOVER DOMANDA */
+.faq-question:hover {
+  background-color: #f5f9ff;
+}
+
+/* FRECCIA */
+.faq-arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+/* ROTAZIONE FRECCIA */
+.faq-item.active .faq-arrow {
+  transform: rotate(180deg);
+}
+
+/* RISPOSTA */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  background-color: #fafcff;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+}
+
+/* RISPOSTA APERTA */
+.faq-item.active .faq-answer {
+  max-height: 500px;
+  padding: 15px 20px;
+}
+
+/* TESTO RISPOSTA */
+.faq-answer p {
+  margin: 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #1f4e79;
+  color: white;
+  margin-top: 30px;
+}
