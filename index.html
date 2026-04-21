@@ -9,11 +9,26 @@
 <body>
 
   <header>
-    <h1>Guida semplice al CUP</h1>
-    <p>Informazioni utili per prenotare visite ed esami in modo chiaro e semplice</p>
+    <div class="container">
+      <h1>Guida semplice al CUP</h1>
+      <p>Informazioni utili per prenotare visite ed esami in modo chiaro e semplice</p>
+
+      <div class="hero-buttons">
+        <a href="#cosa-portare" class="btn">Cosa devo portare?</a>
+        <a href="#faq" class="btn btn-secondary">Domande frequenti</a>
+      </div>
+    </div>
   </header>
 
-  <main>
+  <main class="container">
+    <section class="box evidenza-top">
+      <h2>Avviso importante</h2>
+      <p>
+        Prima di recarti al CUP, controlla bene documenti, data, orario e luogo della visita.
+        Un controllo in più può evitare disagi e perdite di tempo.
+      </p>
+    </section>
+
     <section class="box">
       <h2>Cos’è il CUP</h2>
       <p>
@@ -31,7 +46,7 @@
       </ul>
     </section>
 
-    <section class="box">
+    <section class="box" id="cosa-portare">
       <h2>Cosa portare</h2>
       <ul>
         <li>Impegnativa del medico, se necessaria</li>
@@ -89,77 +104,76 @@
         Un’informazione chiesta in più può evitare errori, ritardi e disagi.
       </p>
     </section>
-  
-    <section class="box">
+
+    <section class="box" id="faq">
       <h2>Domande frequenti</h2>
 
-         <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-                <span>Ho prenotato per telefono ma non ho il promemoria, cosa faccio?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>
-                    Puoi rivolgerti al CUP per verificare la prenotazione. In alcuni casi puoi recuperare i dati
-                    tramite il Fascicolo Sanitario Elettronico.
-                </p>
-            </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Ho prenotato per telefono ma non ho il promemoria, cosa faccio?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            Puoi rivolgerti al CUP per verificare la prenotazione. In alcuni casi puoi recuperare i dati
+            tramite il Fascicolo Sanitario Elettronico.
+          </p>
         </div>
+      </div>
 
-        <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-                <span>Posso pagare il ticket senza QR code?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>
-                    Dipende dal sistema. In alcuni casi è necessario il codice o il promemoria della prenotazione.
-                    Se non lo hai, chiedi al CUP come procedere.
-                </p>
-            </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Posso pagare il ticket senza QR code?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            Dipende dal sistema. In alcuni casi è necessario il codice o il promemoria della prenotazione.
+            Se non lo hai, chiedi al CUP come procedere.
+          </p>
         </div>
+      </div>
 
-        <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-                <span>Se non pago il ticket cosa succede?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>
-                    In alcuni casi la prestazione potrebbe non essere erogata oppure potrebbero esserci conseguenze
-                    amministrative. È sempre meglio informarsi prima e conservare la ricevuta di pagamento.
-                </p>
-            </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Se non pago il ticket cosa succede?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            In alcuni casi la prestazione potrebbe non essere erogata oppure potrebbero esserci conseguenze
+            amministrative. È sempre meglio informarsi prima e conservare la ricevuta di pagamento.
+          </p>
         </div>
+      </div>
 
-        <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-                <span>Come faccio a disdire una prenotazione?</span>  
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>
-                    Puoi disdire tramite i canali ufficiali, come telefono, sportello o servizi online, se disponibili.
-                    È importante farlo nei tempi previsti.
-                </p>
-            </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Come faccio a disdire una prenotazione?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            Puoi disdire tramite i canali ufficiali, come telefono, sportello o servizi online, se disponibili.
+            È importante farlo nei tempi previsti.
+          </p>
         </div>
+      </div>
 
-        <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-                <span>Non ricordo se ho visite prenotate, come faccio a controllare?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>
-                Puoi rivolgerti al CUP oppure utilizzare i servizi online, se disponibili. È importante conservare
-                sempre i dati della prenotazione.
-                </p>
-            </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Non ricordo se ho visite prenotate, come faccio a controllare?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            Puoi rivolgerti al CUP oppure utilizzare i servizi online, se disponibili. È importante conservare
+            sempre i dati della prenotazione.
+          </p>
         </div>
+      </div>
     </section>
-</main>
-
+  </main>
 
   <footer>
     <p>Pagina informativa - Associazione Valentina ODV</p>
