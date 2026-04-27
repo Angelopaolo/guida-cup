@@ -30,7 +30,7 @@ async function aggiornaMonitor() {
 }
 
 function annunciaNumero(numero, servizio) {
-  const testo = `Numero ${numero}, servizio ${servizio}`;
+  const testo = `Numero ${numero}. servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
