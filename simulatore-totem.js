@@ -1,6 +1,6 @@
 const choiceButtons = document.querySelectorAll(".totem-btn");
 
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaIi-qZeo1M46Ss-ssCMWMUdCSsSpeKZPVpKHDgFvAsq3pFMXSKpsP0fD-He1YgF_5/exec";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu3fKtI1IDGWpAa2JIl3ubTyL8Ypt_MPbInaCvkBM/dev";
 
 const orariServizi = {
   cartelle: { start: 9.75, end: 23 },
