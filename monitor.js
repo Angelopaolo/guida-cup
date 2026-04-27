@@ -42,28 +42,25 @@ function annunciaNumero(numero, servizio) {
     cifre = numero.slice(1);
   }
 
-  // 👉 QUI USI parseInt
+  // 👉 numero reale
   const numeroIntero = parseInt(cifre, 10);
-
-  const parolaNumero = numeroInParole(numeroIntero);
 
   let testo = `Numero ${prefisso}`;
 
-  // se inizia con zero → lo diciamo
+  // 👉 se ha lo zero davanti
   if (cifre.startsWith("0")) {
     testo += " zero";
   }
 
-  testo += ` ${parolaNumero}. servizio ${servizio}`;
+  // 👉 QUI LA MAGIA
+  testo += ` ${numeroIntero}. servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
   voce.rate = 0.75;
-  voce.pitch = 1;
-  voce.volume = 1;
 
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(voce);
+  speechSynthesis.cancel();
+  speechSynthesis.speak(voce);
 }
 
 function numeroInParole(n) {
