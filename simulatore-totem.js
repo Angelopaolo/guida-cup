@@ -4,11 +4,11 @@ const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblG
 
 const orariServizi = {
   cartelle: { start: 9.75, end: 24 },
-  pagamenti: { start: 8, end: 24 },
+  pagamenti: { start: 0, end: 24 },
   laboratorio: { start: 7.83, end: 11 },
   prenotazioni: { start: 7.83, end: 16 },
-  cortesia: { start: 7.83, end: 24 },
-  libera: { start: 13, end: 24 }
+  cortesia: { start: 0, end: 24 },
+  libera: { start: 0, end: 24 }
 };
 
 function getOraCorrente() {
