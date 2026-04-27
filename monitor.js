@@ -61,7 +61,10 @@ function annunciaNumero(numero, servizio) {
   voce.volume = 1;
 
   window.speechSynthesis.cancel();
+
+setTimeout(() => {
   window.speechSynthesis.speak(voce);
+}, 800); // pausa di 0.8 secondi
 }
 
 function numeroInParole(n) {
