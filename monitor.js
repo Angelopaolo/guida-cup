@@ -30,7 +30,6 @@ async function aggiornaMonitor() {
 }
 
 function annunciaNumero(numero, servizio) {
-
   let prefisso = "";
   let cifre = "";
 
@@ -42,43 +41,60 @@ function annunciaNumero(numero, servizio) {
     cifre = numero.slice(1);
   }
 
-  // 👉 numero reale
   const numeroIntero = parseInt(cifre, 10);
+  const numeroLetto = numeroInParole(numeroIntero);
 
   let testo = `Numero ${prefisso}`;
 
-  // 👉 se ha lo zero davanti
   if (cifre.startsWith("0")) {
-    testo += " zero";
+    testo += ` zero ${numeroLetto}`;
+  } else {
+    testo += ` ${numeroLetto}`;
   }
 
-  // 👉 QUI LA MAGIA
-  testo += ` ${numeroIntero}. servizio ${servizio}`;
+  testo += `. Servizio ${servizio}.`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
   voce.rate = 0.75;
+  voce.pitch = 1;
+  voce.volume = 1;
 
-  speechSynthesis.cancel();
-  speechSynthesis.speak(voce);
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(voce);
 }
 
 function numeroInParole(n) {
-  const unita = ["zero","uno","due","tre","quattro","cinque","sei","sette","otto","nove"];
-
-  const decine = ["","","venti","trenta","quaranta","cinquanta","sessanta","settanta","ottanta","novanta"];
+  const unita = [
+    "zero", "uno", "due", "tre", "quattro",
+    "cinque", "sei", "sette", "otto", "nove"
+  ];
 
   const speciali = {
-    10:"dieci",11:"undici",12:"dodici",13:"tredici",14:"quattordici",
-    15:"quindici",16:"sedici",17:"diciassette",18:"diciotto",19:"diciannove"
+    10: "dieci",
+    11: "undici",
+    12: "dodici",
+    13: "tredici",
+    14: "quattordici",
+    15: "quindici",
+    16: "sedici",
+    17: "diciassette",
+    18: "diciotto",
+    19: "diciannove"
   };
 
+  const decine = [
+    "", "", "venti", "trenta", "quaranta",
+    "cinquanta", "sessanta", "settanta", "ottanta", "novanta"
+  ];
+
   if (n < 10) return unita[n];
-  if (n < 20) return speciali[n];
+
+  if (n >= 10 && n < 20) return speciali[n];
 
   if (n < 100) {
-    let d = Math.floor(n / 10);
-    let u = n % 10;
+    const d = Math.floor(n / 10);
+    const u = n % 10;
 
     let parola = decine[d];
 
@@ -89,7 +105,20 @@ function numeroInParole(n) {
     return parola + (u ? unita[u] : "");
   }
 
-  return n.toString();
+  if (n < 1000) {
+    const c = Math.floor(n / 100);
+    const resto = n % 100;
+
+    let parola = c === 1 ? "cento" : unita[c] + "cento";
+
+    if (resto > 0) {
+      parola += " " + numeroInParole(resto);
+    }
+
+    return parola;
+  }
+
+  return String(n);
 }
 
 aggiornaMonitor();
