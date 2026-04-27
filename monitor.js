@@ -60,12 +60,17 @@ function annunciaNumero(numero, servizio) {
   voce.pitch = 1;
   voce.volume = 1;
 
-  window.speechSynthesis.cancel();
+ window.speechSynthesis.cancel();
 
-setTimeout(() => {
-  window.speechSynthesis.speak(voce);
-}, 800); // pausa di 0.8 secondi
-}
+const beep = new Audio("beep.mp3");
+
+beep.play();
+
+beep.onended = () => {
+  setTimeout(() => {
+    window.speechSynthesis.speak(voce);
+  }, 300);
+};
 
 function numeroInParole(n) {
   const unita = [
