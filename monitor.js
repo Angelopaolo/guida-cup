@@ -68,7 +68,7 @@ beep.play();
 
 setTimeout(() => {
   window.speechSynthesis.speak(voce);
-}, 80);
+}, 400);
   .catch(() => {
     // Se il beep non parte, parte comunque la voce
     setTimeout(() => {
