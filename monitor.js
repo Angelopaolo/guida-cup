@@ -1,4 +1,4 @@
-const APP_SCRIPT_URL = "IL_TUO_URL_APPS_SCRIPT_EXEC";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
 let ultimoNumeroAnnunciato = "";
 
