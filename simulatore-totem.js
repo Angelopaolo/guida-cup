@@ -8,7 +8,7 @@ const orariServizi = {
   laboratorio: { start: 7.83, end: 11 },
   prenotazioni: { start: 7.83, end: 16 },
   cortesia: { start: 7.83, end: 16 },
-  libera: { start: 5, end: 23 }
+  libera: { start: 13, end: 18 }
 };
 
 function getOraCorrente() {
@@ -29,10 +29,10 @@ function generaNumeroTotem(servizio) {
   const prefissi = {
     cartelle: "C",
     pagamenti: "P",
-    laboratorio: "L",
+    laboratorio: "F",
     prenotazioni: "A",
-    cortesia: "S",
-    libera: "LP"
+    cortesia: "G",
+    libera: "L"
   };
 
   const prefisso = prefissi[servizio] || "N";
