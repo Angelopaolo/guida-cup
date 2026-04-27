@@ -64,17 +64,14 @@ window.speechSynthesis.cancel();
 
 const beep = new Audio("beep.mp3");
 beep.volume = 0.6;
-beep.play();
+
+beep.play().catch(() => {
+  console.log("Beep non riprodotto");
+});
 
 setTimeout(() => {
   window.speechSynthesis.speak(voce);
-}, 400);
-  .catch(() => {
-    // Se il beep non parte, parte comunque la voce
-    setTimeout(() => {
-      window.speechSynthesis.speak(voce);
-    }, 0);
-  });
+}, 250);
 
 }  
 
