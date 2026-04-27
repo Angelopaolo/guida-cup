@@ -5,7 +5,7 @@ const choiceButtons = document.querySelectorAll(".totem-btn");
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTC9MxnZShyLU9Li0AHnCtINf_0Zr2UWG9cs6vFgL--vp4TYdxQFQvetWn_JJ2koML/exec";
 
 const orariServizi = {
-  cartelle: { start: 9.75, end: 12 },
+  cartelle: { start: 9.75, end: 23 },
   pagamenti: { start: 8, end: 23 },
   laboratorio: { start: 7.83, end: 11 },
   prenotazioni: { start: 7.83, end: 16 },
