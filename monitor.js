@@ -63,13 +63,12 @@ function annunciaNumero(numero, servizio) {
 window.speechSynthesis.cancel();
 
 const beep = new Audio("beep.mp3");
+beep.volume = 0.6;
+beep.play();
 
-beep.play()
-  .then(() => {
-    beep.onended = () => {
+setTimeout(() => {
   window.speechSynthesis.speak(voce);
-};
-  })
+}, 400);
   .catch(() => {
     // Se il beep non parte, parte comunque la voce
     setTimeout(() => {
