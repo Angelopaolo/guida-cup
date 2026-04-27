@@ -67,10 +67,8 @@ const beep = new Audio("beep.mp3");
 beep.play()
   .then(() => {
     beep.onended = () => {
-      setTimeout(() => {
-        window.speechSynthesis.speak(voce);
-      }, 0);
-    };
+  window.speechSynthesis.speak(voce);
+};
   })
   .catch(() => {
     // Se il beep non parte, parte comunque la voce
