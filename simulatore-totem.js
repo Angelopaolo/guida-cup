@@ -3,12 +3,12 @@ const choiceButtons = document.querySelectorAll(".totem-btn");
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
 const orariServizi = {
-  cartelle: { start: 9.75, end: 23 },
-  pagamenti: { start: 8, end: 23 },
+  cartelle: { start: 9.75, end: 23.50 },
+  pagamenti: { start: 8, end: 23.50 },
   laboratorio: { start: 7.83, end: 11 },
   prenotazioni: { start: 7.83, end: 16 },
-  cortesia: { start: 7.83, end: 23 },
-  libera: { start: 13, end: 23 }
+  cortesia: { start: 7.83, end: 23.50 },
+  libera: { start: 13, end: 23.50 }
 };
 
 function getOraCorrente() {
