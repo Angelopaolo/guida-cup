@@ -735,3 +735,43 @@ footer {
     font-size: 20px;
   }
 }
+
+
+
+.monitor-mode {
+  background-color: #0f2c4d;
+  color: white;
+  text-align: center;
+}
+
+.monitor-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 25px;
+}
+
+.monitor-box {
+  background: white;
+  color: #1f4e79;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 20px;
+}
+
+#numeroMonitor {
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+#servizioMonitor {
+  font-size: 2rem;
+  margin-top: 15px;
+}
+
+#oraMonitor {
+  font-size: 1.3rem;
+  margin-top: 10px;
+}
