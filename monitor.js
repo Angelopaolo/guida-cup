@@ -69,7 +69,7 @@ beep.play()
     beep.onended = () => {
       setTimeout(() => {
         window.speechSynthesis.speak(voce);
-      }, 50);
+      }, 200);
     };
   })
   .catch(() => {
