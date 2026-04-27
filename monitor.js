@@ -69,14 +69,14 @@ beep.play()
     beep.onended = () => {
       setTimeout(() => {
         window.speechSynthesis.speak(voce);
-      }, 1000);
+      }, 0);
     };
   })
   .catch(() => {
     // Se il beep non parte, parte comunque la voce
     setTimeout(() => {
       window.speechSynthesis.speak(voce);
-    }, 1000);
+    }, 0);
   });
 
 }  
