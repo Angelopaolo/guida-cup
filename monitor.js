@@ -72,6 +72,8 @@ beep.onended = () => {
   }, 300);
 };
 
+}  
+
 function numeroInParole(n) {
   const unita = [
     "zero", "uno", "due", "tre", "quattro",
