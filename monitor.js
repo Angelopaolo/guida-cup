@@ -30,16 +30,69 @@ async function aggiornaMonitor() {
 }
 
 function annunciaNumero(numero, servizio) {
-  const testo = `Numero ${numero}. servizio ${servizio}`;
+
+  let prefisso = "";
+  let cifre = "";
+
+  if (numero.startsWith("LP")) {
+    prefisso = "LP";
+    cifre = numero.slice(2);
+  } else {
+    prefisso = numero.charAt(0);
+    cifre = numero.slice(1);
+  }
+
+  // 👉 QUI USI parseInt
+  const numeroIntero = parseInt(cifre, 10);
+
+  const parolaNumero = numeroInParole(numeroIntero);
+
+  let testo = `Numero ${prefisso}`;
+
+  // se inizia con zero → lo diciamo
+  if (cifre.startsWith("0")) {
+    testo += " zero";
+  }
+
+  testo += ` ${parolaNumero}. servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
-  voce.rate = 0.50;
+  voce.rate = 0.75;
   voce.pitch = 1;
   voce.volume = 1;
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(voce);
+}
+
+function numeroInParole(n) {
+  const unita = ["zero","uno","due","tre","quattro","cinque","sei","sette","otto","nove"];
+
+  const decine = ["","","venti","trenta","quaranta","cinquanta","sessanta","settanta","ottanta","novanta"];
+
+  const speciali = {
+    10:"dieci",11:"undici",12:"dodici",13:"tredici",14:"quattordici",
+    15:"quindici",16:"sedici",17:"diciassette",18:"diciotto",19:"diciannove"
+  };
+
+  if (n < 10) return unita[n];
+  if (n < 20) return speciali[n];
+
+  if (n < 100) {
+    let d = Math.floor(n / 10);
+    let u = n % 10;
+
+    let parola = decine[d];
+
+    if (u === 1 || u === 8) {
+      parola = parola.slice(0, -1);
+    }
+
+    return parola + (u ? unita[u] : "");
+  }
+
+  return n.toString();
 }
 
 aggiornaMonitor();
