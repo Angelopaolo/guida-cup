@@ -1,8 +1,8 @@
+const choiceButtons = document.querySelectorAll(".totem-btn");
+
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
 const TOKEN_SICUREZZA = "CHIAVE_SUPER_SEGRETA_123";
-
-const choiceButtons = document.querySelectorAll(".totem-btn");
 
 const orariServizi = {
   cartelle: { start: 9.75, end: 24 },
@@ -30,14 +30,28 @@ function emailValida(email) {
 
 async function generaNumeroTotem(servizio, emailUtente) {
   try {
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 8000);
+
     const response = await fetch(APP_SCRIPT_URL, {
       method: "POST",
       body: new URLSearchParams({
         servizio: servizio,
         email: emailUtente,
         token: TOKEN_SICUREZZA
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      alert("Errore del server");
+      return null;
+    }
 
     const data = await response.json();
 
@@ -89,6 +103,12 @@ choiceButtons.forEach((button) => {
     if (button.classList.contains("disabled")) return;
 
     const servizio = button.dataset.result;
+
+    if (!orariServizi[servizio]) {
+      alert("Servizio non valido");
+      return;
+    }
+
     const emailUtente = prompt("Inserisci la tua email:");
 
     if (!emailUtente) {
@@ -96,26 +116,41 @@ choiceButtons.forEach((button) => {
       return;
     }
 
-    if (!emailValida(emailUtente)) {
+    const emailPulita = emailUtente.trim().toLowerCase();
+
+    if (!emailValida(emailPulita)) {
       alert("Email non valida ❌");
       return;
     }
 
-    button.disabled = true;
+    choiceButtons.forEach((b) => {
+      b.disabled = true;
+    });
 
-    const numero = await generaNumeroTotem(servizio, emailUtente.trim());
+    const numero = await generaNumeroTotem(servizio, emailPulita);
 
-    button.disabled = false;
+    choiceButtons.forEach((b) => {
+      b.disabled = false;
+    });
 
     if (!numero) return;
 
     const display = document.getElementById("displayNumero");
 
     if (display) {
-      display.innerHTML = `
-        <div style="font-size:32px; color:#007bff;">🎫 ${numero}</div>
-        <div style="color:#000000;">Controlla la tua email</div>
-      `;
+      display.textContent = "";
+
+      const numeroDiv = document.createElement("div");
+      numeroDiv.style.fontSize = "32px";
+      numeroDiv.style.color = "#007bff";
+      numeroDiv.textContent = `🎫 ${numero}`;
+
+      const testoDiv = document.createElement("div");
+      testoDiv.style.color = "#000000";
+      testoDiv.textContent = "Controlla la tua email";
+
+      display.appendChild(numeroDiv);
+      display.appendChild(testoDiv);
     }
 
     choiceButtons.forEach((b) => b.classList.remove("active"));
