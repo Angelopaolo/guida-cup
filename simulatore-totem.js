@@ -27,6 +27,15 @@ function emailValida(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+if (!emailValida(email)) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          ok: false,
+          errore: "Email non valida"
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
 async function generaNumeroTotem(servizio, emailUtente) {
   try {
     const response = await fetch(APP_SCRIPT_URL, {
@@ -34,6 +43,7 @@ async function generaNumeroTotem(servizio, emailUtente) {
       body: new URLSearchParams({
         servizio: servizio,
         email: emailUtente
+        token: "CHIAVE_SUPER_SEGRETA_123"
       })
     });
 
