@@ -12,13 +12,30 @@ const btnAvviaChiamate = document.getElementById("btnAvviaChiamate");
 const btnFermaChiamate = document.getElementById("btnFermaChiamate");
 
 async function leggiNumeroDaGoogleSheet() {
-  const response = await fetch(APP_SCRIPT_URL + "?t=" + Date.now());
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 8000);
+
+  const response = await fetch(APP_SCRIPT_URL + "?t=" + Date.now(), {
+    method: "GET",
+    signal: controller.signal
+  });
+
+  clearTimeout(timeout);
 
   if (!response.ok) {
     throw new Error("Errore nella risposta del server");
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  if (!data.ok) {
+    throw new Error(data.errore || "Errore dati monitor");
+  }
+
+  return data;
 }
 
 function mostraSulMonitor(data) {
@@ -43,7 +60,7 @@ async function sincronizzaMonitorSenzaAnnunciare() {
 
   } catch (error) {
     numeroMonitor.textContent = "Errore";
-    servizioMonitor.textContent = "---";
+    servizioMonitor.textContent = "Monitor non disponibile";
     oraMonitor.textContent = "---";
   }
 }
@@ -68,12 +85,14 @@ async function aggiornaMonitor() {
 
   } catch (error) {
     numeroMonitor.textContent = "Errore";
-    servizioMonitor.textContent = "---";
+    servizioMonitor.textContent = "Monitor non disponibile";
     oraMonitor.textContent = "---";
   }
 }
 
 function annunciaNumero(numero, servizio) {
+  if (!("speechSynthesis" in window)) return;
+
   const testo = `Numero ${numero}. Servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
@@ -96,12 +115,10 @@ async function avviaChiamate() {
   servizioMonitor.textContent = "Sincronizzazione...";
   oraMonitor.textContent = "";
 
-  // Prima lettura muta
   await sincronizzaMonitorSenzaAnnunciare();
 
-  // Poi controlla solo i nuovi numeri
   if (!intervalloMonitor) {
-    intervalloMonitor = setInterval(aggiornaMonitor, 10000);
+    intervalloMonitor = setInterval(aggiornaMonitor, 15000);
   }
 }
 
@@ -113,7 +130,9 @@ function fermaChiamate() {
     intervalloMonitor = null;
   }
 
-  window.speechSynthesis.cancel();
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
 
   numeroMonitor.textContent = "---";
   servizioMonitor.textContent = "Monitor spento";
