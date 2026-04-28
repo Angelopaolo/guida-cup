@@ -1,4 +1,4 @@
-const APP_SCRIPT_URL = "INCOLLA_QUI_LA_TUA_WEB_APP_URL";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
 const TOKEN_SICUREZZA = "CHIAVE_SUPER_SEGRETA_123";
 
