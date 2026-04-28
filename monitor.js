@@ -3,6 +3,7 @@ const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblG
 let ultimoNumeroAnnunciato = localStorage.getItem("ultimoNumeroAnnunciato") || "";
 let chiamateAttive = false;
 let intervalloMonitor = null;
+let primaLetturaDopoAvvio = true;
 
 const numeroMonitor = document.getElementById("numeroMonitor");
 const servizioMonitor = document.getElementById("servizioMonitor");
@@ -29,21 +30,24 @@ async function aggiornaMonitor() {
     servizioMonitor.textContent = servizio;
     oraMonitor.textContent = ora;
 
-    if (numero !== "---" && numero !== "Errore") {
+    if (
+      chiamateAttive &&
+      numero !== "---" &&
+      numero !== "Errore"
+    ) {
+      if (primaLetturaDopoAvvio) {
+        ultimoNumeroAnnunciato = numero;
+        localStorage.setItem("ultimoNumeroAnnunciato", numero);
+        primaLetturaDopoAvvio = false;
+        return;
+      }
 
-  if (primaLettura) {
-    // 🔇 prima volta: NON annunciare
-    ultimoNumeroAnnunciato = numero;
-    localStorage.setItem("ultimoNumeroAnnunciato", numero);
-    primaLettura = false;
-  } 
-  else if (numero !== ultimoNumeroAnnunciato) {
-    // 🔊 dalla seconda in poi: annuncia
-    annunciaNumero(numero, servizio);
-    ultimoNumeroAnnunciato = numero;
-    localStorage.setItem("ultimoNumeroAnnunciato", numero);
-  }
-}
+      if (numero !== ultimoNumeroAnnunciato) {
+        annunciaNumero(numero, servizio);
+        ultimoNumeroAnnunciato = numero;
+        localStorage.setItem("ultimoNumeroAnnunciato", numero);
+      }
+    }
 
   } catch (error) {
     numeroMonitor.textContent = "Errore";
@@ -67,6 +71,7 @@ function annunciaNumero(numero, servizio) {
 
 function avviaChiamate() {
   chiamateAttive = true;
+  primaLetturaDopoAvvio = true;
 
   numeroMonitor.textContent = "Avvio...";
   servizioMonitor.textContent = "Monitor attivo";
@@ -103,7 +108,6 @@ function fermaChiamate() {
 btnAvviaChiamate.addEventListener("click", avviaChiamate);
 btnFermaChiamate.addEventListener("click", fermaChiamate);
 
-// Monitor spento all'apertura
 numeroMonitor.textContent = "---";
 servizioMonitor.textContent = "Monitor spento";
 oraMonitor.textContent = "---";
