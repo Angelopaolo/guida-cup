@@ -1,9 +1,8 @@
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
-let ultimoNumeroAnnunciato = localStorage.getItem("ultimoNumeroAnnunciato") || "";
+let ultimoNumeroAnnunciato = "";
 let chiamateAttive = false;
 let intervalloMonitor = null;
-let primaLetturaDopoAvvio = true;
 
 const numeroMonitor = document.getElementById("numeroMonitor");
 const servizioMonitor = document.getElementById("servizioMonitor");
@@ -12,41 +11,59 @@ const oraMonitor = document.getElementById("oraMonitor");
 const btnAvviaChiamate = document.getElementById("btnAvviaChiamate");
 const btnFermaChiamate = document.getElementById("btnFermaChiamate");
 
-async function aggiornaMonitor() {
+async function leggiNumeroDaGoogleSheet() {
+  const response = await fetch(APP_SCRIPT_URL + "?t=" + Date.now());
+
+  if (!response.ok) {
+    throw new Error("Errore nella risposta del server");
+  }
+
+  return await response.json();
+}
+
+function mostraSulMonitor(data) {
+  const numero = data.numero || "---";
+  const servizio = data.servizio || "---";
+  const ora = data.ora || "---";
+
+  numeroMonitor.textContent = numero;
+  servizioMonitor.textContent = servizio;
+  oraMonitor.textContent = ora;
+
+  return { numero, servizio, ora };
+}
+
+async function sincronizzaMonitorSenzaAnnunciare() {
   try {
-    const response = await fetch(APP_SCRIPT_URL);
+    const data = await leggiNumeroDaGoogleSheet();
+    const { numero } = mostraSulMonitor(data);
 
-    if (!response.ok) {
-      throw new Error("Errore nella risposta del server");
-    }
+    ultimoNumeroAnnunciato = numero;
+    localStorage.setItem("ultimoNumeroAnnunciato", numero);
 
-    const data = await response.json();
+  } catch (error) {
+    numeroMonitor.textContent = "Errore";
+    servizioMonitor.textContent = "---";
+    oraMonitor.textContent = "---";
+  }
+}
 
-    const numero = data.numero || "---";
-    const servizio = data.servizio || "---";
-    const ora = data.ora || "---";
+async function aggiornaMonitor() {
+  if (!chiamateAttive) return;
 
-    numeroMonitor.textContent = numero;
-    servizioMonitor.textContent = servizio;
-    oraMonitor.textContent = ora;
+  try {
+    const data = await leggiNumeroDaGoogleSheet();
+    const { numero, servizio } = mostraSulMonitor(data);
 
     if (
-      chiamateAttive &&
       numero !== "---" &&
-      numero !== "Errore"
+      numero !== "Errore" &&
+      numero !== ultimoNumeroAnnunciato
     ) {
-      if (primaLetturaDopoAvvio) {
-        ultimoNumeroAnnunciato = numero;
-        localStorage.setItem("ultimoNumeroAnnunciato", numero);
-        primaLetturaDopoAvvio = false;
-        return;
-      }
+      annunciaNumero(numero, servizio);
 
-      if (numero !== ultimoNumeroAnnunciato) {
-        annunciaNumero(numero, servizio);
-        ultimoNumeroAnnunciato = numero;
-        localStorage.setItem("ultimoNumeroAnnunciato", numero);
-      }
+      ultimoNumeroAnnunciato = numero;
+      localStorage.setItem("ultimoNumeroAnnunciato", numero);
     }
 
   } catch (error) {
@@ -69,19 +86,20 @@ function annunciaNumero(numero, servizio) {
   window.speechSynthesis.speak(voce);
 }
 
-function avviaChiamate() {
+async function avviaChiamate() {
   chiamateAttive = true;
-  primaLetturaDopoAvvio = true;
-
-  numeroMonitor.textContent = "Avvio...";
-  servizioMonitor.textContent = "Monitor attivo";
-  oraMonitor.textContent = "";
 
   btnAvviaChiamate.style.display = "none";
   btnFermaChiamate.style.display = "inline-block";
 
-  aggiornaMonitor();
+  numeroMonitor.textContent = "Avvio...";
+  servizioMonitor.textContent = "Sincronizzazione...";
+  oraMonitor.textContent = "";
 
+  // Prima lettura muta
+  await sincronizzaMonitorSenzaAnnunciare();
+
+  // Poi controlla solo i nuovi numeri
   if (!intervalloMonitor) {
     intervalloMonitor = setInterval(aggiornaMonitor, 5000);
   }
