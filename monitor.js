@@ -101,7 +101,7 @@ async function avviaChiamate() {
 
   // Poi controlla solo i nuovi numeri
   if (!intervalloMonitor) {
-    intervalloMonitor = setInterval(aggiornaMonitor, 5000);
+    intervalloMonitor = setInterval(aggiornaMonitor, 10000);
   }
 }
 
