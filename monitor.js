@@ -1,6 +1,6 @@
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
-let ultimoNumeroAnnunciato = "";
+let ultimoNumeroAnnunciato = localStorage.getItem("ultimoNumeroAnnunciato") || "";
 let chiamateAttive = false;
 let intervalloMonitor = null;
 
@@ -36,6 +36,7 @@ async function aggiornaMonitor() {
     ) {
       annunciaNumero(numero, servizio);
       ultimoNumeroAnnunciato = numero;
+      localStorage.setItem("ultimoNumeroAnnunciato", numero);
     }
 
   } catch (error) {
@@ -88,8 +89,6 @@ function fermaChiamate() {
   numeroMonitor.textContent = "---";
   servizioMonitor.textContent = "Monitor spento";
   oraMonitor.textContent = "---";
-
-  ultimoNumeroAnnunciato = "";
 
   btnAvviaChiamate.style.display = "inline-block";
   btnFermaChiamate.style.display = "none";
