@@ -1,6 +1,8 @@
-const choiceButtons = document.querySelectorAll(".totem-btn");
+const APP_SCRIPT_URL = "INCOLLA_QUI_LA_TUA_WEB_APP_URL";
 
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
+const TOKEN_SICUREZZA = "CHIAVE_SUPER_SEGRETA_123";
+
+const choiceButtons = document.querySelectorAll(".totem-btn");
 
 const orariServizi = {
   cartelle: { start: 9.75, end: 24 },
@@ -19,7 +21,6 @@ function getOraCorrente() {
 function formatOra(oraDecimale) {
   const ore = Math.floor(oraDecimale);
   const minuti = Math.round((oraDecimale - ore) * 60);
-
   return `${String(ore).padStart(2, "0")}:${String(minuti).padStart(2, "0")}`;
 }
 
@@ -27,23 +28,14 @@ function emailValida(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-if (!emailValida(email)) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          ok: false,
-          errore: "Email non valida"
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
 async function generaNumeroTotem(servizio, emailUtente) {
   try {
     const response = await fetch(APP_SCRIPT_URL, {
       method: "POST",
       body: new URLSearchParams({
         servizio: servizio,
-        email: emailUtente
-        token: "CHIAVE_SUPER_SEGRETA_123"
+        email: emailUtente,
+        token: TOKEN_SICUREZZA
       })
     });
 
@@ -55,6 +47,7 @@ async function generaNumeroTotem(servizio, emailUtente) {
     }
 
     return data.numero;
+
   } catch (error) {
     console.error("Errore collegamento:", error);
     alert("Errore di collegamento con il sistema");
@@ -72,7 +65,10 @@ function aggiornaStatoPulsanti() {
     const oldInfo = button.querySelector(".totem-info");
     if (oldInfo) oldInfo.remove();
 
-    if (!orario) return;
+    if (!orario) {
+      button.classList.add("disabled");
+      return;
+    }
 
     if (ora < orario.start || ora > orario.end) {
       button.classList.add("disabled");
@@ -95,12 +91,21 @@ choiceButtons.forEach((button) => {
     const servizio = button.dataset.result;
     const emailUtente = prompt("Inserisci la tua email:");
 
+    if (!emailUtente) {
+      alert("Operazione annullata");
+      return;
+    }
+
     if (!emailValida(emailUtente)) {
       alert("Email non valida ❌");
       return;
     }
 
-    const numero = await generaNumeroTotem(servizio, emailUtente);
+    button.disabled = true;
+
+    const numero = await generaNumeroTotem(servizio, emailUtente.trim());
+
+    button.disabled = false;
 
     if (!numero) return;
 
