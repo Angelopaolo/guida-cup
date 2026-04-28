@@ -29,15 +29,21 @@ async function aggiornaMonitor() {
     servizioMonitor.textContent = servizio;
     oraMonitor.textContent = ora;
 
-    if (
-      numero !== "---" &&
-      numero !== "Errore" &&
-      numero !== ultimoNumeroAnnunciato
-    ) {
-      annunciaNumero(numero, servizio);
-      ultimoNumeroAnnunciato = numero;
-      localStorage.setItem("ultimoNumeroAnnunciato", numero);
-    }
+    if (numero !== "---" && numero !== "Errore") {
+
+  if (primaLettura) {
+    // 🔇 prima volta: NON annunciare
+    ultimoNumeroAnnunciato = numero;
+    localStorage.setItem("ultimoNumeroAnnunciato", numero);
+    primaLettura = false;
+  } 
+  else if (numero !== ultimoNumeroAnnunciato) {
+    // 🔊 dalla seconda in poi: annuncia
+    annunciaNumero(numero, servizio);
+    ultimoNumeroAnnunciato = numero;
+    localStorage.setItem("ultimoNumeroAnnunciato", numero);
+  }
+}
 
   } catch (error) {
     numeroMonitor.textContent = "Errore";
