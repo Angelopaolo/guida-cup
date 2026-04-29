@@ -112,10 +112,10 @@ async function avviaChiamate() {
   btnFermaChiamate.style.display = "inline-block";
 
   numeroMonitor.textContent = "Avvio...";
-  servizioMonitor.textContent = "Sincronizzazione...";
+  servizioMonitor.textContent = "Chiamata in corso...";
   oraMonitor.textContent = "";
 
-  await sincronizzaMonitorSenzaAnnunciare();
+  await aggiornaMonitor();
 
   if (!intervalloMonitor) {
     intervalloMonitor = setInterval(aggiornaMonitor, 15000);
