@@ -4,12 +4,17 @@ let ultimoNumeroAnnunciato = "";
 let chiamateAttive = false;
 let intervalloMonitor = null;
 
-const numeroMonitor = document.getElementById("numeroMonitor");
-const servizioMonitor = document.getElementById("servizioMonitor");
-const oraMonitor = document.getElementById("oraMonitor");
-
 const btnAvviaChiamate = document.getElementById("btnAvviaChiamate");
 const btnFermaChiamate = document.getElementById("btnFermaChiamate");
+
+const SERVIZI_MONITOR = [
+  "cartelle",
+  "pagamenti",
+  "laboratorio",
+  "prenotazioni",
+  "cortesia",
+  "libera"
+];
 
 async function leggiNumeroDaGoogleSheet() {
   const controller = new AbortController();
@@ -18,10 +23,13 @@ async function leggiNumeroDaGoogleSheet() {
     controller.abort();
   }, 8000);
 
-  const response = await fetch(APP_SCRIPT_URL + "?t=" + Date.now(), {
-    method: "GET",
-    signal: controller.signal
-  });
+  const response = await fetch(
+    APP_SCRIPT_URL + "?azione=chiama_prossimo&t=" + Date.now(),
+    {
+      method: "GET",
+      signal: controller.signal
+    }
+  );
 
   clearTimeout(timeout);
 
@@ -38,31 +46,32 @@ async function leggiNumeroDaGoogleSheet() {
   return data;
 }
 
-function mostraSulMonitor(data) {
-  const numero = data.numero || "---";
-  const servizio = data.servizio || "---";
-  const ora = data.ora || "---";
+function aggiornaFinestre(statoServizi) {
+  SERVIZI_MONITOR.forEach((servizio) => {
+    const numeroEl = document.getElementById("num-" + servizio);
+    const oraEl = document.getElementById("ora-" + servizio);
+    const cardEl = document.getElementById("card-" + servizio);
 
-  numeroMonitor.textContent = numero;
-  servizioMonitor.textContent = servizio;
-  oraMonitor.textContent = ora;
+    if (!numeroEl || !oraEl || !cardEl) return;
 
-  return { numero, servizio, ora };
+    const dati = statoServizi && statoServizi[servizio];
+
+    numeroEl.textContent = dati && dati.numero ? dati.numero : "---";
+    oraEl.textContent = dati && dati.ora ? dati.ora : "---";
+
+    cardEl.classList.remove("monitor-active");
+  });
 }
 
-async function sincronizzaMonitorSenzaAnnunciare() {
-  try {
-    const data = await leggiNumeroDaGoogleSheet();
-    const { numero } = mostraSulMonitor(data);
+function evidenziaServizio(servizio) {
+  const card = document.getElementById("card-" + servizio);
+  if (!card) return;
 
-    ultimoNumeroAnnunciato = numero;
-    localStorage.setItem("ultimoNumeroAnnunciato", numero);
+  card.classList.add("monitor-active");
 
-  } catch (error) {
-    numeroMonitor.textContent = "Errore";
-    servizioMonitor.textContent = "Monitor non disponibile";
-    oraMonitor.textContent = "---";
-  }
+  setTimeout(() => {
+    card.classList.remove("monitor-active");
+  }, 3500);
 }
 
 async function aggiornaMonitor() {
@@ -70,13 +79,18 @@ async function aggiornaMonitor() {
 
   try {
     const data = await leggiNumeroDaGoogleSheet();
-    const { numero, servizio } = mostraSulMonitor(data);
+
+    aggiornaFinestre(data.statoServizi);
+
+    const numero = data.numero || "---";
+    const servizio = data.servizio || "---";
 
     if (
       numero !== "---" &&
       numero !== "Errore" &&
       numero !== ultimoNumeroAnnunciato
     ) {
+      evidenziaServizio(servizio);
       annunciaNumero(numero, servizio);
 
       ultimoNumeroAnnunciato = numero;
@@ -84,9 +98,9 @@ async function aggiornaMonitor() {
     }
 
   } catch (error) {
-    numeroMonitor.textContent = "Errore";
-    servizioMonitor.textContent = "Monitor non disponibile";
-    oraMonitor.textContent = "---";
+    console.error(error);
+    fermaChiamate();
+    alert("Errore monitor: " + error.message);
   }
 }
 
@@ -102,6 +116,15 @@ function annunciaNumero(numero, servizio) {
     LP: "elle pi"
   };
 
+  const nomiServizi = {
+    cartelle: "Cartelle cliniche",
+    pagamenti: "Pagamenti",
+    laboratorio: "Laboratorio analisi",
+    prenotazioni: "Prenotazioni e accettazioni",
+    cortesia: "Sportello cortesia",
+    libera: "Libera professione"
+  };
+
   const lettereNumero = numero.match(/[A-Z]+/);
   const cifreNumero = numero.match(/\d+/);
 
@@ -111,11 +134,13 @@ function annunciaNumero(numero, servizio) {
   const parteNumerica = parseInt(cifreNumero[0], 10);
 
   const letteraDaLeggere = lettere[sigla] || sigla;
-  const testo = `Numero ${letteraDaLeggere} ${parteNumerica}. Servizio ${servizio}`;
+  const nomeServizio = nomiServizi[servizio] || servizio;
+
+  const testo = `Numero ${letteraDaLeggere} ${parteNumerica}. Servizio ${nomeServizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
-  voce.rate = 0.50;
+  voce.rate = 0.75;
   voce.pitch = 1;
   voce.volume = 1;
 
@@ -128,10 +153,6 @@ async function avviaChiamate() {
 
   btnAvviaChiamate.style.display = "none";
   btnFermaChiamate.style.display = "inline-block";
-
-  numeroMonitor.textContent = "Avvio...";
-  servizioMonitor.textContent = "Chiamata in corso...";
-  oraMonitor.textContent = "";
 
   await aggiornaMonitor();
 
@@ -152,17 +173,9 @@ function fermaChiamate() {
     window.speechSynthesis.cancel();
   }
 
-  numeroMonitor.textContent = "---";
-  servizioMonitor.textContent = "Monitor spento";
-  oraMonitor.textContent = "---";
-
   btnAvviaChiamate.style.display = "inline-block";
   btnFermaChiamate.style.display = "none";
 }
 
 btnAvviaChiamate.addEventListener("click", avviaChiamate);
 btnFermaChiamate.addEventListener("click", fermaChiamate);
-
-numeroMonitor.textContent = "---";
-servizioMonitor.textContent = "Monitor spento";
-oraMonitor.textContent = "---";
