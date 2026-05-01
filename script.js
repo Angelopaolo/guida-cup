@@ -2,15 +2,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const questions = document.querySelectorAll(".faq-question");
 
   questions.forEach((question) => {
-    question.addEventListener("click", (e) => {
-      e.stopPropagation();
+    question.addEventListener("click", function (event) {
+      event.stopPropagation();
 
       const currentItem = question.parentElement;
       const isActive = currentItem.classList.contains("active");
 
       document.querySelectorAll(".faq-item").forEach((item) => {
         item.classList.remove("active");
-        item.querySelector(".faq-question").setAttribute("aria-expanded", "false");
+
+        const btn = item.querySelector(".faq-question");
+        if (btn) {
+          btn.setAttribute("aria-expanded", "false");
+        }
       });
 
       if (!isActive) {
@@ -20,15 +24,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  document.addEventListener("click", () => {
+  document.addEventListener("click", function () {
     document.querySelectorAll(".faq-item").forEach((item) => {
       item.classList.remove("active");
-      item.querySelector(".faq-question").setAttribute("aria-expanded", "false");
+
+      const btn = item.querySelector(".faq-question");
+      if (btn) {
+        btn.setAttribute("aria-expanded", "false");
+      }
     });
   });
-});
 
-document.getElementById("enterBtn").addEventListener("click", function() {
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("mainContent").style.display = "block";
+  const enterBtn = document.getElementById("enterBtn");
+  const overlay = document.getElementById("overlay");
+  const mainContent = document.getElementById("mainContent");
+
+  if (enterBtn && overlay && mainContent) {
+    enterBtn.addEventListener("click", function () {
+      overlay.style.display = "none";
+      mainContent.style.display = "block";
+    });
+  }
 });
