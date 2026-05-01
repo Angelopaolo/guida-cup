@@ -5,16 +5,50 @@
   <title>Monitor CUP</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="monitor-mode">
 
   <main class="monitor-container">
     <h1>Monitor CUP</h1>
 
-    <div class="monitor-box">
-      <p>Numero chiamato</p>
-      <div id="numeroMonitor">---</div>
-      <div id="servizioMonitor">---</div>
-      <div id="oraMonitor">---</div>
+    <div class="monitor-grid">
+
+      <div class="monitor-card" id="card-cartelle">
+        <h2>Cartelle cliniche</h2>
+        <div class="monitor-number" id="num-cartelle">---</div>
+        <div class="monitor-time" id="ora-cartelle">---</div>
+      </div>
+
+      <div class="monitor-card" id="card-pagamenti">
+        <h2>Pagamenti</h2>
+        <div class="monitor-number" id="num-pagamenti">---</div>
+        <div class="monitor-time" id="ora-pagamenti">---</div>
+      </div>
+
+      <div class="monitor-card" id="card-laboratorio">
+        <h2>Laboratorio analisi</h2>
+        <div class="monitor-number" id="num-laboratorio">---</div>
+        <div class="monitor-time" id="ora-laboratorio">---</div>
+      </div>
+
+      <div class="monitor-card" id="card-prenotazioni">
+        <h2>Prenotazioni e Accettazioni</h2>
+        <div class="monitor-number" id="num-prenotazioni">---</div>
+        <div class="monitor-time" id="ora-prenotazioni">---</div>
+      </div>
+
+      <div class="monitor-card" id="card-cortesia">
+        <h2>Sportello cortesia</h2>
+        <div class="monitor-number" id="num-cortesia">---</div>
+        <div class="monitor-time" id="ora-cortesia">---</div>
+      </div>
+
+      <div class="monitor-card" id="card-libera">
+        <h2>Libera professione</h2>
+        <div class="monitor-number" id="num-libera">---</div>
+        <div class="monitor-time" id="ora-libera">---</div>
+      </div>
+
     </div>
 
     <button id="btnAvviaChiamate" class="btn">
