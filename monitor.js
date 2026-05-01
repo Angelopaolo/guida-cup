@@ -93,15 +93,29 @@ async function aggiornaMonitor() {
 function annunciaNumero(numero, servizio) {
   if (!("speechSynthesis" in window)) return;
 
-  // Separo lettera e numero
-  const lettera = numero.match(/[A-Z]+/)[0];
-  const numeroParte = parseInt(numero.replace(/\D/g, ""), 10);
+  const lettere = {
+    P: "pi",
+    C: "ci",
+    L: "elle",
+    A: "a",
+    S: "esse",
+    LP: "elle pi"
+  };
 
-  const testo = `Numero ${lettera} ${numeroParte}. Servizio ${servizio}`;
+  const lettereNumero = numero.match(/[A-Z]+/);
+  const cifreNumero = numero.match(/\d+/);
+
+  if (!lettereNumero || !cifreNumero) return;
+
+  const sigla = lettereNumero[0];
+  const parteNumerica = parseInt(cifreNumero[0], 10);
+
+  const letteraDaLeggere = lettere[sigla] || sigla;
+  const testo = `Numero ${letteraDaLeggere} ${parteNumerica}. Servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
-  voce.rate = 0.85; // più naturale
+  voce.rate = 0.75;
   voce.pitch = 1;
   voce.volume = 1;
 
