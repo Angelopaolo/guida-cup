@@ -775,3 +775,110 @@ footer {
   font-size: 1.3rem;
   margin-top: 10px;
 }
+
+
+/* ===============================
+   MONITOR CUP - STILE PULSANTIERA
+================================ */
+
+.monitor-totem-style {
+  justify-content: flex-start;
+  padding: 25px 15px;
+}
+
+.monitor-totem-style h1 {
+  margin: 10px 0 20px;
+  font-size: 2.2rem;
+}
+
+.monitor-grid {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 25px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+
+.monitor-card {
+  min-height: 210px;
+  padding: 20px;
+  border-radius: 18px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, outline 0.2s ease;
+}
+
+.monitor-card:hover {
+  transform: scale(1.02);
+}
+
+.monitor-title {
+  font-size: 1.35rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.monitor-number {
+  font-size: 3.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.monitor-time {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.monitor-active {
+  outline: 6px solid #f9a825;
+  transform: scale(1.04);
+}
+
+/* Colori uguali alla pulsantiera */
+
+.monitor-card.cartelle {
+  background: linear-gradient(135deg, #2e7d32, #54b15a);
+}
+
+.monitor-card.pagamento {
+  background: linear-gradient(135deg, #03f8f4, #04f7e3);
+  color: #003333;
+}
+
+.monitor-card.laboratorio {
+  background: linear-gradient(135deg, #6a1b9a, #4a148c);
+}
+
+.monitor-card.prenotazioni {
+  background: linear-gradient(135deg, #fbc02d, #f9a825);
+  color: #222;
+}
+
+.monitor-card.cortesia {
+  background: linear-gradient(135deg, #00897b, #00695c);
+}
+
+.monitor-card.libera {
+  background: linear-gradient(135deg, #01600c, #124602f9);
+}
+
+@media (max-width: 700px) {
+  .monitor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitor-card {
+    min-height: 150px;
+  }
+
+  .monitor-number {
+    font-size: 3rem;
+  }
+}
