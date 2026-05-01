@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+  // ===== FAQ =====
   const questions = document.querySelectorAll(".faq-question");
 
   questions.forEach((question) => {
@@ -24,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Chiudi FAQ cliccando fuori
   document.addEventListener("click", function () {
     document.querySelectorAll(".faq-item").forEach((item) => {
       item.classList.remove("active");
@@ -35,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // ===== OVERLAY LAVORI IN CORSO =====
   const enterBtn = document.getElementById("enterBtn");
   const overlay = document.getElementById("overlay");
   const mainContent = document.getElementById("mainContent");
@@ -45,4 +49,5 @@ document.addEventListener("DOMContentLoaded", function () {
       mainContent.style.display = "block";
     });
   }
+
 });
