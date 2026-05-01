@@ -115,7 +115,7 @@ function annunciaNumero(numero, servizio) {
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
-  voce.rate = 0.75;
+  voce.rate = 0.50;
   voce.pitch = 1;
   voce.volume = 1;
 
