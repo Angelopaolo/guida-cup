@@ -115,9 +115,22 @@ function aggiornaStatoPulsanti() {
   });
 }
 
+function mostraMessaggio(testo) {
+  const display = document.getElementById("displayNumero");
+  if (!display) return;
+
+  display.textContent = "";
+
+  const messaggioDiv = document.createElement("div");
+  messaggioDiv.style.fontSize = "20px";
+  messaggioDiv.style.color = "#000000";
+  messaggioDiv.textContent = testo;
+
+  display.appendChild(messaggioDiv);
+}
+
 function mostraNumeroSulDisplay(numero) {
   const display = document.getElementById("displayNumero");
-
   if (!display) return;
 
   display.textContent = "";
@@ -133,21 +146,6 @@ function mostraNumeroSulDisplay(numero) {
 
   display.appendChild(numeroDiv);
   display.appendChild(testoDiv);
-}
-
-function mostraMessaggio(testo) {
-  const display = document.getElementById("displayNumero");
-
-  if (!display) return;
-
-  display.textContent = "";
-
-  const messaggioDiv = document.createElement("div");
-  messaggioDiv.style.fontSize = "20px";
-  messaggioDiv.style.color = "#000000";
-  messaggioDiv.textContent = testo;
-
-  display.appendChild(messaggioDiv);
 }
 
 choiceButtons.forEach((button) => {
@@ -187,6 +185,7 @@ choiceButtons.forEach((button) => {
       choiceButtons.forEach((b) => {
         b.disabled = false;
       });
+
       mostraMessaggio("Operazione non completata");
       return;
     }
@@ -195,16 +194,22 @@ choiceButtons.forEach((button) => {
 
     if (!codiceOtp) {
       alert("Operazione annullata");
+
       choiceButtons.forEach((b) => {
         b.disabled = false;
       });
+
       mostraMessaggio("Operazione annullata");
       return;
     }
 
     mostraMessaggio("Verifica codice e generazione biglietto...");
 
-    const numero = await generaNumeroTotem(servizio, emailPulita, codiceOtp.trim());
+    const numero = await generaNumeroTotem(
+      servizio,
+      emailPulita,
+      codiceOtp.trim()
+    );
 
     choiceButtons.forEach((b) => {
       b.disabled = false;
