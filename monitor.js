@@ -93,11 +93,15 @@ async function aggiornaMonitor() {
 function annunciaNumero(numero, servizio) {
   if (!("speechSynthesis" in window)) return;
 
-  const testo = `Numero ${numero}. Servizio ${servizio}`;
+  // Separo lettera e numero
+  const lettera = numero.match(/[A-Z]+/)[0];
+  const numeroParte = parseInt(numero.replace(/\D/g, ""), 10);
+
+  const testo = `Numero ${lettera} ${numeroParte}. Servizio ${servizio}`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
-  voce.rate = 0.50;
+  voce.rate = 0.85; // più naturale
   voce.pitch = 1;
   voce.volume = 1;
 
