@@ -64,6 +64,8 @@ function aggiornaFinestre(statoServizi) {
 }
 
 function evidenziaServizio(servizio) {
+  if (!servizio || servizio === "---") return;
+
   const card = document.getElementById("card-" + servizio);
   if (!card) return;
 
@@ -125,8 +127,8 @@ function annunciaNumero(numero, servizio) {
     libera: "Libera professione"
   };
 
-  const lettereNumero = numero.match(/[A-Z]+/);
-  const cifreNumero = numero.match(/\d+/);
+  const lettereNumero = String(numero).match(/[A-Z]+/);
+  const cifreNumero = String(numero).match(/\d+/);
 
   if (!lettereNumero || !cifreNumero) return;
 
