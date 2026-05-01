@@ -28,7 +28,7 @@ function emailValida(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function generaNumeroTotem(servizio, emailUtente) {
+async function richiestaAppsScript(parametri) {
   try {
     const controller = new AbortController();
 
@@ -38,11 +38,7 @@ async function generaNumeroTotem(servizio, emailUtente) {
 
     const response = await fetch(APP_SCRIPT_URL, {
       method: "POST",
-      body: new URLSearchParams({
-        servizio: servizio,
-        email: emailUtente,
-        token: TOKEN_SICUREZZA
-      }),
+      body: new URLSearchParams(parametri),
       signal: controller.signal
     });
 
@@ -56,17 +52,38 @@ async function generaNumeroTotem(servizio, emailUtente) {
     const data = await response.json();
 
     if (!data.ok) {
-      alert(data.errore || "Errore nella generazione del numero");
+      alert(data.errore || "Errore nella richiesta");
       return null;
     }
 
-    return data.numero;
+    return data;
 
   } catch (error) {
     console.error("Errore collegamento:", error);
     alert("Errore di collegamento con il sistema");
     return null;
   }
+}
+
+async function inviaOtp(emailUtente) {
+  return await richiestaAppsScript({
+    azione: "invia_otp",
+    email: emailUtente,
+    token: TOKEN_SICUREZZA
+  });
+}
+
+async function generaNumeroTotem(servizio, emailUtente, codiceOtp) {
+  const data = await richiestaAppsScript({
+    azione: "genera_numero",
+    servizio: servizio,
+    email: emailUtente,
+    codiceOtp: codiceOtp,
+    token: TOKEN_SICUREZZA
+  });
+
+  if (!data) return null;
+  return data.numero;
 }
 
 function aggiornaStatoPulsanti() {
@@ -98,6 +115,41 @@ function aggiornaStatoPulsanti() {
   });
 }
 
+function mostraNumeroSulDisplay(numero) {
+  const display = document.getElementById("displayNumero");
+
+  if (!display) return;
+
+  display.textContent = "";
+
+  const numeroDiv = document.createElement("div");
+  numeroDiv.style.fontSize = "32px";
+  numeroDiv.style.color = "#007bff";
+  numeroDiv.textContent = `🎫 ${numero}`;
+
+  const testoDiv = document.createElement("div");
+  testoDiv.style.color = "#000000";
+  testoDiv.textContent = "Biglietto inviato alla tua email";
+
+  display.appendChild(numeroDiv);
+  display.appendChild(testoDiv);
+}
+
+function mostraMessaggio(testo) {
+  const display = document.getElementById("displayNumero");
+
+  if (!display) return;
+
+  display.textContent = "";
+
+  const messaggioDiv = document.createElement("div");
+  messaggioDiv.style.fontSize = "20px";
+  messaggioDiv.style.color = "#000000";
+  messaggioDiv.textContent = testo;
+
+  display.appendChild(messaggioDiv);
+}
+
 choiceButtons.forEach((button) => {
   button.addEventListener("click", async () => {
     if (button.classList.contains("disabled")) return;
@@ -127,31 +179,43 @@ choiceButtons.forEach((button) => {
       b.disabled = true;
     });
 
-    const numero = await generaNumeroTotem(servizio, emailPulita);
+    mostraMessaggio("Invio codice di verifica...");
+
+    const otpInviato = await inviaOtp(emailPulita);
+
+    if (!otpInviato) {
+      choiceButtons.forEach((b) => {
+        b.disabled = false;
+      });
+      mostraMessaggio("Operazione non completata");
+      return;
+    }
+
+    const codiceOtp = prompt("Inserisci il codice OTP ricevuto via email:");
+
+    if (!codiceOtp) {
+      alert("Operazione annullata");
+      choiceButtons.forEach((b) => {
+        b.disabled = false;
+      });
+      mostraMessaggio("Operazione annullata");
+      return;
+    }
+
+    mostraMessaggio("Verifica codice e generazione biglietto...");
+
+    const numero = await generaNumeroTotem(servizio, emailPulita, codiceOtp.trim());
 
     choiceButtons.forEach((b) => {
       b.disabled = false;
     });
 
-    if (!numero) return;
-
-    const display = document.getElementById("displayNumero");
-
-    if (display) {
-      display.textContent = "";
-
-      const numeroDiv = document.createElement("div");
-      numeroDiv.style.fontSize = "32px";
-      numeroDiv.style.color = "#007bff";
-      numeroDiv.textContent = `🎫 ${numero}`;
-
-      const testoDiv = document.createElement("div");
-      testoDiv.style.color = "#000000";
-      testoDiv.textContent = "Controlla la tua email";
-
-      display.appendChild(numeroDiv);
-      display.appendChild(testoDiv);
+    if (!numero) {
+      mostraMessaggio("Codice non valido o operazione non riuscita");
+      return;
     }
+
+    mostraNumeroSulDisplay(numero);
 
     choiceButtons.forEach((b) => b.classList.remove("active"));
     button.classList.add("active");
