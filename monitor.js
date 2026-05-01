@@ -1,131 +1,108 @@
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
+const APP_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
-let ultimoNumeroAnnunciato = "";
 let chiamateAttive = false;
 let intervalloMonitor = null;
+let ultimoNumeroAnnunciato = "";
 
 const btnAvviaChiamate = document.getElementById("btnAvviaChiamate");
 const btnFermaChiamate = document.getElementById("btnFermaChiamate");
 
-const SERVIZI_MONITOR = [
-  "cartelle",
-  "pagamenti",
-  "laboratorio",
-  "prenotazioni",
-  "cortesia",
-  "libera"
-];
+const SERVIZI = {
+  cartelle: {
+    nome: "Cartelle cliniche"
+  },
+  pagamenti: {
+    nome: "Pagamenti"
+  },
+  laboratorio: {
+    nome: "Laboratorio analisi"
+  },
+  prenotazioni: {
+    nome: "Prenotazioni e accettazioni"
+  },
+  cortesia: {
+    nome: "Sportello cortesia"
+  },
+  libera: {
+    nome: "Libera professione"
+  }
+};
 
-async function leggiNumeroDaGoogleSheet() {
+const LETTERE_DA_LEGGERE = {
+  C: "ci",
+  P: "pi",
+  L: "elle",
+  A: "a",
+  S: "esse",
+  LP: "elle pi"
+};
+
+async function chiamaProssimoNumero() {
+  const url = `${APP_SCRIPT_URL}?azione=chiama_prossimo&t=${Date.now()}`;
+
   const controller = new AbortController();
 
   const timeout = setTimeout(() => {
     controller.abort();
   }, 8000);
 
-  const response = await fetch(
-    APP_SCRIPT_URL + "?azione=chiama_prossimo&t=" + Date.now(),
-    {
+  try {
+    const response = await fetch(url, {
       method: "GET",
       signal: controller.signal
+    });
+
+    if (!response.ok) {
+      throw new Error("Risposta non valida dal server");
     }
-  );
 
-  clearTimeout(timeout);
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error("Errore nella risposta del server");
+    if (!data.ok) {
+      throw new Error(data.errore || "Errore dal backend");
+    }
+
+    return data;
+
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const data = await response.json();
-
-  if (!data.ok) {
-    throw new Error(data.errore || "Errore dati monitor");
-  }
-
-  return data;
 }
 
-function aggiornaFinestre(statoServizi) {
-  SERVIZI_MONITOR.forEach((servizio) => {
-    const numeroEl = document.getElementById("num-" + servizio);
-    const oraEl = document.getElementById("ora-" + servizio);
-    const cardEl = document.getElementById("card-" + servizio);
+function aggiornaTutteLeFinestre(statoServizi) {
+  Object.keys(SERVIZI).forEach((servizio) => {
+    const numeroEl = document.getElementById(`num-${servizio}`);
+    const oraEl = document.getElementById(`ora-${servizio}`);
+    const cardEl = document.getElementById(`card-${servizio}`);
 
     if (!numeroEl || !oraEl || !cardEl) return;
 
     const dati = statoServizi && statoServizi[servizio];
 
-    numeroEl.textContent = dati && dati.numero ? dati.numero : "---";
-    oraEl.textContent = dati && dati.ora ? dati.ora : "---";
+    numeroEl.textContent = dati?.numero || "---";
+    oraEl.textContent = dati?.ora || "---";
 
     cardEl.classList.remove("monitor-active");
   });
 }
 
-function evidenziaServizio(servizio) {
+function evidenziaFinestra(servizio) {
   if (!servizio || servizio === "---") return;
 
-  const card = document.getElementById("card-" + servizio);
-  if (!card) return;
+  const cardEl = document.getElementById(`card-${servizio}`);
+  if (!cardEl) return;
 
-  card.classList.add("monitor-active");
+  cardEl.classList.add("monitor-active");
 
   setTimeout(() => {
-    card.classList.remove("monitor-active");
+    cardEl.classList.remove("monitor-active");
   }, 3500);
-}
-
-async function aggiornaMonitor() {
-  if (!chiamateAttive) return;
-
-  try {
-    const data = await leggiNumeroDaGoogleSheet();
-
-    aggiornaFinestre(data.statoServizi);
-
-    const numero = data.numero || "---";
-    const servizio = data.servizio || "---";
-
-    if (
-      numero !== "---" &&
-      numero !== "Errore" &&
-      numero !== ultimoNumeroAnnunciato
-    ) {
-      evidenziaServizio(servizio);
-      annunciaNumero(numero, servizio);
-
-      ultimoNumeroAnnunciato = numero;
-      localStorage.setItem("ultimoNumeroAnnunciato", numero);
-    }
-
-  } catch (error) {
-    console.error(error);
-    fermaChiamate();
-    alert("Errore monitor: " + error.message);
-  }
 }
 
 function annunciaNumero(numero, servizio) {
   if (!("speechSynthesis" in window)) return;
-
-  const lettere = {
-    P: "pi",
-    C: "ci",
-    L: "elle",
-    A: "a",
-    S: "esse",
-    LP: "elle pi"
-  };
-
-  const nomiServizi = {
-    cartelle: "Cartelle cliniche",
-    pagamenti: "Pagamenti",
-    laboratorio: "Laboratorio analisi",
-    prenotazioni: "Prenotazioni e accettazioni",
-    cortesia: "Sportello cortesia",
-    libera: "Libera professione"
-  };
+  if (!numero || numero === "---") return;
 
   const lettereNumero = String(numero).match(/[A-Z]+/);
   const cifreNumero = String(numero).match(/\d+/);
@@ -135,10 +112,12 @@ function annunciaNumero(numero, servizio) {
   const sigla = lettereNumero[0];
   const parteNumerica = parseInt(cifreNumero[0], 10);
 
-  const letteraDaLeggere = lettere[sigla] || sigla;
-  const nomeServizio = nomiServizi[servizio] || servizio;
+  const letteraDaLeggere = LETTERE_DA_LEGGERE[sigla] || sigla;
+  const nomeServizio = SERVIZI[servizio]?.nome || servizio;
 
-  const testo = `Numero ${letteraDaLeggere} ${parteNumerica}. Servizio ${nomeServizio}`;
+  const testo =
+    `Numero ${letteraDaLeggere} ${parteNumerica}. ` +
+    `Servizio ${nomeServizio}.`;
 
   const voce = new SpeechSynthesisUtterance(testo);
   voce.lang = "it-IT";
@@ -148,6 +127,38 @@ function annunciaNumero(numero, servizio) {
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(voce);
+}
+
+async function aggiornaMonitor() {
+  if (!chiamateAttive) return;
+
+  try {
+    const data = await chiamaProssimoNumero();
+
+    aggiornaTutteLeFinestre(data.statoServizi);
+
+    const numero = data.numero || "---";
+    const servizio = data.servizio || "---";
+
+    const numeroValido =
+      numero !== "---" &&
+      numero !== "Errore" &&
+      numero !== ultimoNumeroAnnunciato;
+
+    if (numeroValido) {
+      evidenziaFinestra(servizio);
+      annunciaNumero(numero, servizio);
+
+      ultimoNumeroAnnunciato = numero;
+      localStorage.setItem("ultimoNumeroAnnunciato", numero);
+    }
+
+  } catch (error) {
+    console.error("Errore monitor:", error);
+
+    alert("Errore monitor: " + error.message);
+    fermaChiamate();
+  }
 }
 
 async function avviaChiamate() {
