@@ -1,7 +1,9 @@
 const choiceButtons = document.querySelectorAll(".totem-btn");
 
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
+const APP_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
 
+// VERSIONE TEST: email e OTP disattivati
 const TOKEN_SICUREZZA = "CHIAVE_SUPER_SEGRETA_123";
 
 const orariServizi = {
@@ -22,10 +24,6 @@ function formatOra(oraDecimale) {
   const ore = Math.floor(oraDecimale);
   const minuti = Math.round((oraDecimale - ore) * 60);
   return `${String(ore).padStart(2, "0")}:${String(minuti).padStart(2, "0")}`;
-}
-
-function emailValida(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 async function richiestaAppsScript(parametri) {
@@ -65,20 +63,17 @@ async function richiestaAppsScript(parametri) {
   }
 }
 
-async function inviaOtp(emailUtente) {
-  return await richiestaAppsScript({
-    azione: "invia_otp",
-    email: emailUtente,
-    token: TOKEN_SICUREZZA
-  });
-}
-
-async function generaNumeroTotem(servizio, emailUtente, codiceOtp) {
+async function generaNumeroTotem(servizio) {
   const data = await richiestaAppsScript({
     azione: "genera_numero",
     servizio: servizio,
-    email: emailUtente,
-    codiceOtp: codiceOtp,
+
+    // Email finta solo per test
+    email: "test@example.com",
+
+    // OTP finto solo per test
+    codiceOtp: "TEST",
+
     token: TOKEN_SICUREZZA
   });
 
@@ -142,7 +137,7 @@ function mostraNumeroSulDisplay(numero) {
 
   const testoDiv = document.createElement("div");
   testoDiv.style.color = "#000000";
-  testoDiv.textContent = "Biglietto inviato alla tua email";
+  testoDiv.textContent = "Biglietto generato in modalità test";
 
   display.appendChild(numeroDiv);
   display.appendChild(testoDiv);
@@ -159,64 +154,20 @@ choiceButtons.forEach((button) => {
       return;
     }
 
-    const emailUtente = prompt("Inserisci la tua email:");
-
-    if (!emailUtente) {
-      alert("Operazione annullata");
-      return;
-    }
-
-    const emailPulita = emailUtente.trim().toLowerCase();
-
-    if (!emailValida(emailPulita)) {
-      alert("Email non valida ❌");
-      return;
-    }
-
     choiceButtons.forEach((b) => {
       b.disabled = true;
     });
 
-    mostraMessaggio("Invio codice di verifica...");
+    mostraMessaggio("Generazione biglietto in corso...");
 
-    const otpInviato = await inviaOtp(emailPulita);
-
-    if (!otpInviato) {
-      choiceButtons.forEach((b) => {
-        b.disabled = false;
-      });
-
-      mostraMessaggio("Operazione non completata");
-      return;
-    }
-
-    const codiceOtp = prompt("Inserisci il codice OTP ricevuto via email:");
-
-    if (!codiceOtp) {
-      alert("Operazione annullata");
-
-      choiceButtons.forEach((b) => {
-        b.disabled = false;
-      });
-
-      mostraMessaggio("Operazione annullata");
-      return;
-    }
-
-    mostraMessaggio("Verifica codice e generazione biglietto...");
-
-    const numero = await generaNumeroTotem(
-      servizio,
-      emailPulita,
-      codiceOtp.trim()
-    );
+    const numero = await generaNumeroTotem(servizio);
 
     choiceButtons.forEach((b) => {
       b.disabled = false;
     });
 
     if (!numero) {
-      mostraMessaggio("Codice non valido o operazione non riuscita");
+      mostraMessaggio("Operazione non riuscita");
       return;
     }
 
