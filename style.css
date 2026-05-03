@@ -882,3 +882,14 @@ footer {
     font-size: 3rem;
   }
 }
+
+
+footer a {
+  color: #ffffff; /* bianco */
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+footer a:hover {
+  color: #f9a825; /* giallo come i tuoi pulsanti */
+}
