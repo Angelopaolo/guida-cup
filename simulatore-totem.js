@@ -1,7 +1,7 @@
 const choiceButtons = document.querySelectorAll(".totem-btn");
 
 const APP_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyrgkv9GD7i4vblGz1gn6gAaJGdAT_TpjGMqt56_js1mNYKANL9CIyViCz_U-aylzBnGA/exec";
+  "https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec";
 
 // VERSIONE TEST: email e OTP disattivati
 const TOKEN_SICUREZZA = "CHIAVE_SUPER_SEGRETA_123";
