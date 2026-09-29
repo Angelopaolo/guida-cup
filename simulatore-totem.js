@@ -64,7 +64,7 @@ function bigliettoVerificato(dati, richiesta) {
 
 async function controllaRichiesta(richiesta) {
   return scambiaDati({azione: "stato_richiesta", token: TOKEN_SICUREZZA,
-    requestId: richiesta.id, servizio: richiesta.servizio}, "GET", 10000);
+    requestId: richiesta.id, servizio: richiesta.servizio}, "GET", 30000);
 }
 
 function aggiornaDisponibilita() {
@@ -115,7 +115,7 @@ async function eseguiRichiesta(invia) {
       try {
         risposta = await scambiaDati({azione: "genera_numero", servizio: richiesta.servizio,
           email: "test@example.com", codiceOtp: "TEST", token: TOKEN_SICUREZZA,
-          requestId: richiesta.id}, "POST", 10000);
+          requestId: richiesta.id}, "POST", 30000);
       } catch (errore) {
         console.warn("Conferma CUP non ricevuta: verifico la stessa richiesta", errore);
       }
@@ -166,7 +166,7 @@ async function preparaSimulatore() {
       }
       richiestaPendente = precedente;
     }
-    const versione = await scambiaDati({azione: "versione"}, "GET", 10000);
+    const versione = await scambiaDati({azione: "versione"}, "GET", 30000);
     if (!versione.ok || versione.versioneApi !== VERSIONE_API || !versione.recuperoRichieste) {
       mostraMessaggio("Il servizio CUP deve essere aggiornato prima di usare il simulatore.");
       aggiungiAzione("Ricontrolla il collegamento", preparaSimulatore);
