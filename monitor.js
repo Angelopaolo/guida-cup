@@ -2,6 +2,7 @@ const APP_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec";
 
 let chiamateAttive = false;
+let richiestaMonitorInCorso = false;
 let intervalloMonitor = null;
 let ultimoNumeroAnnunciato = "";
 
@@ -45,7 +46,7 @@ async function chiamaProssimoNumero() {
 
   const timeout = setTimeout(() => {
     controller.abort();
-  }, 8000);
+  }, 30000);
 
   try {
     const response = await fetch(url, {
@@ -130,10 +131,16 @@ function annunciaNumero(numero, servizio) {
 }
 
 async function aggiornaMonitor() {
-  if (!chiamateAttive) return;
+  if (!chiamateAttive || richiestaMonitorInCorso) return;
+
+  richiestaMonitorInCorso = true;
+  btnAvviaChiamate.disabled = true;
 
   try {
     const data = await chiamaProssimoNumero();
+
+    // Una risposta tardiva non riavvia gli annunci dopo Ferma chiamate.
+    if (!chiamateAttive) return;
 
     aggiornaTutteLeFinestre(data.statoServizi);
 
@@ -156,12 +163,22 @@ async function aggiornaMonitor() {
   } catch (error) {
     console.error("Errore monitor:", error);
 
-    alert("Errore monitor: " + error.message);
+    const mostraErrore = chiamateAttive;
     fermaChiamate();
+    if (mostraErrore) {
+      const messaggio = error.name === "AbortError"
+        ? "Il monitor non ha ricevuto conferma entro 30 secondi."
+        : "Il monitor non ha ricevuto una conferma valida.";
+      alert(messaggio + " Le chiamate sono state fermate. Controlla nel foglio Coda se un numero risulta già chiamato prima di riavviare.");
+    }
+  } finally {
+    richiestaMonitorInCorso = false;
+    btnAvviaChiamate.disabled = false;
   }
 }
 
 async function avviaChiamate() {
+  if (chiamateAttive || richiestaMonitorInCorso) return;
   chiamateAttive = true;
 
   btnAvviaChiamate.style.display = "none";
@@ -169,7 +186,7 @@ async function avviaChiamate() {
 
   await aggiornaMonitor();
 
-  if (!intervalloMonitor) {
+  if (chiamateAttive && !intervalloMonitor) {
     intervalloMonitor = setInterval(aggiornaMonitor, 15000);
   }
 }
