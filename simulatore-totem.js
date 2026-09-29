@@ -32,7 +32,7 @@ async function richiestaAppsScript(parametri) {
 
     const timeout = setTimeout(() => {
       controller.abort();
-    }, 8000);
+    }, 30000);
 
     const response = await fetch(APP_SCRIPT_URL, {
       method: "POST",
