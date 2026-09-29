@@ -33,9 +33,14 @@ let richiestaPendente = null;
 let operazioneInCorso = false;
 let servizioPronto = false;
 
-async function scambiaDati(parametri, metodo, limiteMs) {
+async function scambiaDati(parametri, metodo, limiteMs, segnaleEsterno) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), limiteMs);
+  const annulla = () => controller.abort();
+  if (segnaleEsterno) {
+    if (segnaleEsterno.aborted) annulla();
+    else segnaleEsterno.addEventListener("abort", annulla, {once: true});
+  }
   try {
     const indirizzo = new URL(APP_SCRIPT_URL);
     const opzioni = {method: metodo, signal: controller.signal};
@@ -53,6 +58,7 @@ async function scambiaDati(parametri, metodo, limiteMs) {
   } finally {
     // Il limite copre anche la lettura del contenuto della risposta.
     clearTimeout(timer);
+    if (segnaleEsterno) segnaleEsterno.removeEventListener("abort", annulla);
   }
 }
 
@@ -62,9 +68,61 @@ function bigliettoVerificato(dati, richiesta) {
     typeof dati.numero === "string" && /^(C|P|L|A|S|LP)[0-9]+$/.test(dati.numero);
 }
 
-async function controllaRichiesta(richiesta) {
+async function controllaRichiesta(richiesta, segnale) {
   return scambiaDati({azione: "stato_richiesta", token: TOKEN_SICUREZZA,
-    requestId: richiesta.id, servizio: richiesta.servizio}, "GET", 30000);
+    requestId: richiesta.id, servizio: richiesta.servizio}, "GET", 30000, segnale);
+}
+
+function attendiVerifica(ms, segnale) {
+  return new Promise(resolve => {
+    if (segnale.aborted) { resolve(false); return; }
+    const finisci = esito => {
+      clearTimeout(timer);
+      segnale.removeEventListener("abort", annulla);
+      resolve(esito);
+    };
+    const annulla = () => finisci(false);
+    const timer = setTimeout(() => finisci(true), ms);
+    segnale.addEventListener("abort", annulla, {once: true});
+  });
+}
+
+async function emettiERecupera(richiesta) {
+  const completata = new AbortController();
+  // Un solo invio: il controllo parallelo legge soltanto la richiesta già inviata.
+  const invio = scambiaDati({azione: "genera_numero", servizio: richiesta.servizio,
+    email: "test@example.com", codiceOtp: "TEST", token: TOKEN_SICUREZZA,
+    requestId: richiesta.id}, "POST", 30000, completata.signal).then(dati => {
+      if (bigliettoVerificato(dati, richiesta) ||
+          (!dati.ok && dati.esito === "rifiutata")) return dati;
+      throw new Error("Conferma dell'emissione non disponibile");
+    });
+
+  const recupero = (async () => {
+    if (!await attendiVerifica(3000, completata.signal)) throw new Error("Verifica interrotta");
+    for (let tentativo = 0; tentativo < 3; tentativo++) {
+      try {
+        const dati = await controllaRichiesta(richiesta, completata.signal);
+        if (bigliettoVerificato(dati, richiesta)) return dati;
+      } catch (errore) {
+        if (completata.signal.aborted) throw errore;
+        console.warn("Verifica CUP temporaneamente non disponibile", errore);
+      }
+      if (tentativo < 2 && !await attendiVerifica(2000, completata.signal)) break;
+    }
+    throw new Error("Biglietto non ancora verificato");
+  })();
+
+  try {
+    // Mostra il numero appena una delle due risposte ne conferma l'identità.
+    return await Promise.any([invio, recupero]);
+  } catch (errore) {
+    console.warn("Conferma CUP non disponibile: la richiesta resta recuperabile", errore);
+    return null;
+  } finally {
+    // Le verifiche rimaste non possono aggiornare una richiesta successiva.
+    completata.abort();
+  }
 }
 
 function aggiornaDisponibilita() {
@@ -111,14 +169,7 @@ async function eseguiRichiesta(invia) {
   mostraMessaggio(invia ? "Generazione biglietto in corso…" : "Verifica del biglietto in corso…");
   try {
     if (invia) {
-      let risposta = null;
-      try {
-        risposta = await scambiaDati({azione: "genera_numero", servizio: richiesta.servizio,
-          email: "test@example.com", codiceOtp: "TEST", token: TOKEN_SICUREZZA,
-          requestId: richiesta.id}, "POST", 30000);
-      } catch (errore) {
-        console.warn("Conferma CUP non ricevuta: verifico la stessa richiesta", errore);
-      }
+      const risposta = await emettiERecupera(richiesta);
       if (bigliettoVerificato(risposta, richiesta)) {
         concludiRichiesta(richiesta);
         mostraNumeroSulDisplay(risposta.numero);
@@ -130,6 +181,8 @@ async function eseguiRichiesta(invia) {
         mostraMessaggio(risposta.errore || "Richiesta non accettata");
         return;
       }
+      mostraRichiestaInAttesa();
+      return;
     }
     mostraMessaggio("Verifica del biglietto già richiesto…");
     for (let tentativo = 0; tentativo < 3; tentativo++) {
