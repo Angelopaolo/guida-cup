@@ -1,1 +1,52 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec?pagina=operatore"><title>CUP · Accesso operatore</title></head><body><p><a href="https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec?pagina=operatore">Apri il pannello operatore con il tuo account Google</a></p></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Guida al CUP · Pannello operatore</title>
+  <style>
+    *{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+    body{height:100dvh;background:#f7f8f3;color:#183c52;font:16px/1.5 Arial,sans-serif;display:flex;flex-direction:column}
+    iframe{display:block;flex:1;min-height:0;width:100%;border:0;background:#f7f8f3}
+    #attesa{padding:18px 5%;font-size:14px}
+    #aiuto{padding:14px 5%;border-bottom:1px solid #dce3df;font-size:14px}
+    a{color:#164f75}p{margin:0 0 10px}a:focus-visible{outline:3px solid #c88035;outline-offset:4px}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <div id="attesa" role="status">Apertura del pannello riservato…</div>
+  <div id="aiuto" hidden><p>Se il pannello non si apre, usa il profilo Chrome <strong>Chatbot</strong>, già collegato all’account del CUP.</p><a href="https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fangelopaolo.github.io%2Fguida-cup%2Foperatore.html">Accedi all’account Google del CUP →</a></div>
+  <noscript>Per usare il pannello operatore occorre attivare JavaScript nel browser.</noscript>
+  <script>
+    (() => {
+      // Questa pagina deve essere la finestra principale, mai un riquadro di un altro sito.
+      if (window.top !== window.self) {
+        document.getElementById('attesa').textContent = 'Apri il pannello direttamente dal sito Guida al CUP.';
+        return;
+      }
+      const origineGoogle = 'https://n-nrkdsnz6ztj4mntl543ytcysq5nspmhiq224oka-0lu-script.googleusercontent.com';
+      const attesa = document.getElementById('attesa');
+      const aiuto = document.getElementById('aiuto');
+      let sorgente = null, nonce = null;
+      const scadenza = setTimeout(() => { attesa.hidden = true; aiuto.hidden = false; }, 20000);
+      window.addEventListener('message', evento => {
+        if (evento.origin !== origineGoogle || !evento.source || !evento.data) return;
+        if (evento.data.tipo === 'cup-verifica-sito' && /^[a-f0-9]{64}$/.test(evento.data.nonce || '')) {
+          sorgente = evento.source;
+          nonce = evento.data.nonce;
+          sorgente.postMessage({tipo: 'cup-sito-confermato', nonce}, origineGoogle);
+        } else if (evento.data.tipo === 'cup-operatore-pronto' && evento.source === sorgente && evento.data.nonce === nonce) {
+          clearTimeout(scadenza); attesa.hidden = true; aiuto.hidden = true;
+        } else if (evento.data.tipo === 'cup-accesso-richiesto') {
+          clearTimeout(scadenza); attesa.hidden = true; aiuto.hidden = true;
+        }
+      });
+      const quadro = document.createElement('iframe');
+      quadro.title = 'Pannello operatore CUP riservato al titolare';
+      quadro.src = 'https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec?pagina=operatore';
+      document.body.appendChild(quadro);
+    })();
+  </script>
+</body>
+</html>
