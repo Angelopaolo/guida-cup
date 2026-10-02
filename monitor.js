@@ -1,3 +1,3 @@
 "use strict";
-// Il monitor pubblico può soltanto leggere le chiamate.
-location.replace("https://script.google.com/macros/s/AKfycbxjg2xdSj8QDjEpjdpHpcM3U_SybrPnZiJ5Ny5NCaHiOorRBCnPVJiQvZRHI2uI40D8dA/exec?pagina=monitor");
+// Aggiorna le vecchie pagine mantenendo il monitor sul sito pubblico.
+location.replace("https://angelopaolo.github.io/guida-cup/monitor.html?v=20261002-schermo");
