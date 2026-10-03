@@ -29,9 +29,57 @@ function formatOra(oraDecimale) {
 // La richiesta resta nella scheda finché il suo esito non è verificato.
 const VERSIONE_API = "cup-richieste-2026-09-29";
 const CHIAVE_RICHIESTA = "cup-richiesta-pendente-v1";
+const CHIAVE_BIGLIETTO = "cup-ultimo-biglietto-v1";
 let richiestaPendente = null;
 let operazioneInCorso = false;
 let servizioPronto = false;
+let conteggioAttivo = null;
+
+function fermaConteggio() {
+  if (!conteggioAttivo) return;
+  clearTimeout(conteggioAttivo.timer);
+  conteggioAttivo.controller.abort();
+  conteggioAttivo = null;
+}
+
+function avviaConteggio(richiesta, numero, iniziale) {
+  fermaConteggio();
+  const sessione = {controller: new AbortController(), timer: null};
+  conteggioAttivo = sessione;
+  const statoDiv = document.getElementById("bigliettiAttesa");
+  function mostra(attesa) {
+    if (conteggioAttivo !== sessione || !statoDiv) return false;
+    let testo;
+    const chiamato = attesa?.stato === "chiamato";
+    if (chiamato) testo = "Il tuo numero è stato chiamato. Guarda il monitor.";
+    else if (attesa?.stato === "in_attesa" && Number.isInteger(attesa.davanti) && attesa.davanti >= 0) {
+      const n = attesa.davanti;
+      testo = n === 0 ? "Nessun biglietto davanti a te. Attendi la chiamata sul monitor." :
+        n === 1 ? "Hai 1 biglietto davanti a te, ancora da chiamare." :
+        "Hai " + n + " biglietti davanti a te, ancora da chiamare.";
+    } else testo = "Conteggio momentaneamente non disponibile. Il tuo biglietto resta valido.";
+    if (statoDiv.textContent !== testo) statoDiv.textContent = testo;
+    return chiamato;
+  }
+  async function aggiorna() {
+    if (conteggioAttivo !== sessione) return;
+    let terminata = false, pausa = 5000;
+    try {
+      const dati = await controllaRichiesta(richiesta, sessione.controller.signal);
+      if (conteggioAttivo !== sessione) return;
+      if (!bigliettoVerificato(dati, richiesta) || dati.numero !== numero) throw new Error("Biglietto non verificato");
+      terminata = mostra(dati.attesa);
+    } catch (_) {
+      if (conteggioAttivo !== sessione) return;
+      mostra(null); pausa = 10000;
+    }
+    if (!terminata && conteggioAttivo === sessione) sessione.timer = setTimeout(aggiorna, pausa);
+  }
+  const terminata = mostra(iniziale);
+  if (!terminata) sessione.timer = setTimeout(aggiorna, iniziale ? 5000 : 0);
+}
+window.addEventListener("pagehide", fermaConteggio);
+window.addEventListener("pageshow", evento => { if (evento.persisted) preparaSimulatore(); });
 
 async function scambiaDati(parametri, metodo, limiteMs, segnaleEsterno) {
   const controller = new AbortController();
@@ -172,7 +220,7 @@ async function eseguiRichiesta(invia) {
       const risposta = await emettiERecupera(richiesta);
       if (bigliettoVerificato(risposta, richiesta)) {
         concludiRichiesta(richiesta);
-        mostraNumeroSulDisplay(risposta.numero);
+        mostraNumeroSulDisplay(risposta.numero, richiesta, risposta.attesa);
         return;
       }
       if (risposta && !risposta.ok && risposta.esito === "rifiutata") {
@@ -190,7 +238,7 @@ async function eseguiRichiesta(invia) {
         const stato = await controllaRichiesta(richiesta);
         if (bigliettoVerificato(stato, richiesta)) {
           concludiRichiesta(richiesta);
-          mostraNumeroSulDisplay(stato.numero);
+          mostraNumeroSulDisplay(stato.numero, richiesta, stato.attesa);
           return;
         }
       } catch (errore) {
@@ -227,7 +275,15 @@ async function preparaSimulatore() {
     }
     servizioPronto = true;
     if (richiestaPendente) await eseguiRichiesta(false);
-    else mostraMessaggio("Seleziona un servizio");
+    else {
+      let ultimo = null;
+      try { ultimo = JSON.parse(sessionStorage.getItem(CHIAVE_BIGLIETTO) || "null"); } catch (_) {}
+      if (ultimo && /^[A-Za-z0-9_-]{20,80}$/.test(ultimo.id) &&
+          Object.prototype.hasOwnProperty.call(orariServizi, ultimo.servizio) &&
+          /^(C|P|L|A|S|LP)[0-9]+$/.test(ultimo.numero)) {
+        mostraNumeroSulDisplay(ultimo.numero, ultimo, null);
+      } else mostraMessaggio("Seleziona un servizio");
+    }
   } catch (errore) {
     console.error("Preparazione CUP:", errore);
     mostraMessaggio("Collegamento non disponibile. Riprova la verifica.");
@@ -267,6 +323,7 @@ function aggiornaStatoPulsanti() {
 }
 
 function mostraMessaggio(testo) {
+  fermaConteggio();
   const display = document.getElementById("displayNumero");
   if (!display) return;
 
@@ -280,7 +337,8 @@ function mostraMessaggio(testo) {
   display.appendChild(messaggioDiv);
 }
 
-function mostraNumeroSulDisplay(numero) {
+function mostraNumeroSulDisplay(numero, richiesta, attesa) {
+  fermaConteggio();
   const display = document.getElementById("displayNumero");
   if (!display) return;
 
@@ -297,6 +355,20 @@ function mostraNumeroSulDisplay(numero) {
 
   display.appendChild(numeroDiv);
   display.appendChild(testoDiv);
+
+  const attesaDiv = document.createElement("div");
+  attesaDiv.id = "bigliettiAttesa";
+  attesaDiv.setAttribute("role", "status");
+  attesaDiv.style.cssText = "margin:20px auto 0;padding:18px;max-width:560px;border:1px solid #b9d5cc;border-radius:12px;background:#e5f0e9;color:#183c52;font-size:21px;line-height:1.5;";
+  display.appendChild(attesaDiv);
+  const nota = document.createElement("p");
+  nota.style.cssText = "font-size:15px;font-weight:normal;color:#435b65;margin:10px 0;";
+  nota.textContent = "Il conteggio segue l’ordine delle chiamate e si aggiorna automaticamente.";
+  display.appendChild(nota);
+  if (richiesta) {
+    try { sessionStorage.setItem(CHIAVE_BIGLIETTO, JSON.stringify({id: richiesta.id, servizio: richiesta.servizio, numero})); } catch (_) {}
+    avviaConteggio(richiesta, numero, attesa);
+  }
 }
 
 choiceButtons.forEach(button => {
@@ -320,6 +392,7 @@ choiceButtons.forEach(button => {
   });
 });
 
+// Avvio del Totem
 aggiornaStatoPulsanti();
 setInterval(() => { aggiornaStatoPulsanti(); aggiornaDisponibilita(); }, 60000);
 preparaSimulatore();
