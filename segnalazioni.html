@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Segnalazioni · Punto di ascolto</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23094d65'/%3E%3Cpath d='M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    html,body{width:100%;height:100%;margin:0;background:#f1f6fa;overflow:hidden}
+    main{width:100%;height:100%;height:100dvh}
+    iframe{display:block;width:100%;height:100%;border:0;background:#f1f6fa}
+  </style>
+<script>
+    // A framed copy must not authorize the embedded form on another website.
+    if (window.top === window.self) {
+      window.addEventListener('message', function (event) {
+        let sender;
+        try { sender = new URL(event.origin); } catch { return; }
+        if (sender.protocol !== 'https:' || !/^[a-z0-9-]+\.googleusercontent\.com$/.test(sender.hostname)) return;
+        if (!event.data || event.data.type !== 'segnalazioni-check-host' || typeof event.data.nonce !== 'string') return;
+        event.source.postMessage({type: 'segnalazioni-host-ok', nonce: event.data.nonce}, event.origin);
+      });
+    }
+  </script>
+</head>
+<body>
+  <main aria-label="Punto di ascolto">
+    <iframe src="https://script.google.com/macros/s/AKfycbylumWin7TATX4VZP-MzqcaJUA9n792y4XikE113eQu-wcARIzWzAKjpfslOLSdhhcC/exec?embed=github" title="Modulo riservato per inviare una segnalazione"></iframe>
+  </main>
+</body>
+</html>
